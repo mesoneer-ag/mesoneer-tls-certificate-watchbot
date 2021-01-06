@@ -33,6 +33,14 @@ jobs:
           }
 
           days=$(datediff "$notAfter" "$(date)")
-
+          echo "${days} to expire"
           echo "::set-output name=daysLeft::${days}"
+
+      - name: Send alert to Slack if needed
+        id: slack_send
+        run: |
+          days="${{ steps.calculate_dates_til_expires.outputs.daysLeft }}"
+
+          type curl
+
           
