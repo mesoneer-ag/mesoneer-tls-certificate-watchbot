@@ -15,8 +15,24 @@ jobs:
             | openssl x509 -noout -dates \
             | grep notAfter)
           echo "::set-output name=notAfter::${notAfter/notAfter=/}"
+
       - name: Show exipration date
         id: debug
         run: |
           echo ${{ steps.probe_cert.outputs.notAfter }}
+
+      - name: Check if the cert is about to expire
+        id: calculate_dates_til_expires
+        run: |
+          notAfter="${{ steps.probe_cert.outputs.notAfter }}"
+
+          datediff() {
+            d1=$(date -d "$1" +%s)
+            d2=$(date -d "$2" +%s)
+            echo $(( (d1 - d2) / 86400 ))
+          }
+
+          days=$(datediff "$notAfter" "$(date)")
+
+          echo "::set-output name=daysLeft::${days}"
           
