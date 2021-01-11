@@ -2,6 +2,9 @@ name: "Check Certificate"
 
 on: [push]
 
+env:
+  DOMAIN: autoid.ubiid.ch
+
 
 jobs:
   check-certificate:
@@ -11,7 +14,7 @@ jobs:
         id: probe_cert
         run: | 
           notAfter=$(echo \
-            | openssl s_client -servername autoid.ubiid.ch -connect autoid.ubiid.ch:443 2>/dev/null \
+            | openssl s_client -servername ${{ env.DOMAIN }} -connect ${{ env.DOMAIN }}:443 2>/dev/null \
             | openssl x509 -noout -dates \
             | grep notAfter)
           echo "::set-output name=notAfter::${notAfter/notAfter=/}"
@@ -21,11 +24,13 @@ jobs:
         run: |
           echo ${{ steps.probe_cert.outputs.notAfter }}
 
-      - name: Check if the cert is about to expire
-        id: calculate_dates_til_expires
+      - name: Calculate how many days until the certificate expires
+        id: calculate_dates_until_expiration
         run: |
           notAfter="${{ steps.probe_cert.outputs.notAfter }}"
 
+          # Copied shamelessly from:
+          # https://unix.stackexchange.com/questions/24626/quickly-calculate-date-differences
           datediff() {
             d1=$(date -d "$1" +%s)
             d2=$(date -d "$2" +%s)
@@ -36,11 +41,58 @@ jobs:
           echo "${days} to expire"
           echo "::set-output name=daysLeft::${days}"
 
+      - name: Determine if alerts should be sent
+        id: should_alert
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const domain = "${{ env.DOMAIN }}";
+            const notAfter = "${{ steps.probe_cert.outputs.notAfter }}";
+            const daysLeft = Number.parseInt('${{ steps.calculate_dates_until_expiration.outputs.daysLeft }}');
+            console.log("[info] - Days left until exipiry: " + daysLeft);
+
+            if (daysLeft > 30) {
+              return {
+                shouldAlert: false
+              }
+            }
+
+            slackNotificationPayload = {
+              "channel": "#throwaway",
+              "blocks" : [
+                  {
+                      "type" : "section",
+                      "text" : {
+                          "type" : "mrkdwn",
+                          "text" : `:warning: TLS certificate for ${domain} is about to expire`
+                      }
+                  },
+                  {
+                      "type" : "divider"
+                  },
+                  {
+                      "type" : "section",
+                      "text" : {
+                          "type" : "mrkdwn",
+                          "text" : `Certificate for domain ${domain} is about to expire on ${notAfter} (in ${daysLeft} days).`
+                      }
+                  }
+              ]
+            }
+
+            return {
+              shouldAlert: true,
+              slackNotificationPayload: JSON.stringify(slackNotificationPayload)
+            }
+
+
       - name: Send alert to Slack if needed
         id: slack_send
+        if: ${{ fromJson(steps.should_alert.outputs.result).shouldAlert }}
         run: |
-          days="${{ steps.calculate_dates_til_expires.outputs.daysLeft }}"
-
-          type curl
+          curl -X POST \
+            --url ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H "Content-Type: application/json" \
+            --data '${{ fromJson(steps.should_alert.outputs.result).slackNotificationPayload }}'
 
           
