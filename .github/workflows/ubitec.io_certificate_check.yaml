@@ -1,11 +1,17 @@
-name: "Check Certificate"
+name: "Check *.ubitec.io Certificate"
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+      - master
+  schedule:
+    # Run every day at 0:00am
+    - cron: '0 0 * * *'
 
 env:
-  DOMAIN: 'autoid.ubiid.ch'
-  SLACK_CHANNEL: '#ubiid_ops'
-
+  DOMAIN: 'docker.ubitec.io'
+  SLACK_CHANNEL: '#infras-alert'
 
 jobs:
   check-certificate:
