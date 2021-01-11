@@ -51,11 +51,13 @@ jobs:
             const daysLeft = Number.parseInt('${{ steps.calculate_dates_until_expiration.outputs.daysLeft }}');
             console.log("[info] - Days left until exipiry: " + daysLeft);
 
+            /*
             if (daysLeft > 30) {
               return {
                 shouldAlert: false
               }
             }
+            */
 
             slackNotificationPayload = {
               "channel": "#throwaway",
