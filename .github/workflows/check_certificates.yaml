@@ -3,14 +3,15 @@ name: "Check Certificate"
 on: [push]
 
 env:
-  DOMAIN: autoid.ubiid.ch
+  DOMAIN: 'autoid.ubiid.ch'
+  SLACK_CHANNEL: '#ubiid_ops'
 
 
 jobs:
   check-certificate:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe certificate of *.ubiid.ch
+      - name: Probe certificate
         id: probe_cert
         run: | 
           notAfter=$(echo \
@@ -51,16 +52,20 @@ jobs:
             const daysLeft = Number.parseInt('${{ steps.calculate_dates_until_expiration.outputs.daysLeft }}');
             console.log("[info] - Days left until exipiry: " + daysLeft);
 
-            /*
-            if (daysLeft > 30) {
+            const range = (lower, upper) => ({ contains: (value) => lower <= value && value <= upper });
+            const alertingRangesOfDaysLeft = [range(0, 5), range(9, 10), range(19, 20), range(29, 30)];
+            const shouldAlert = alertingRangesOfDaysLeft.some(r => r.contains(daysLeft));
+
+            if (shouldAlert == false) {
               return {
-                shouldAlert: false
+                shouldAlert
               }
             }
-            */
 
             slackNotificationPayload = {
-              "channel": "#throwaway",
+              "username" : "ubitec-tls-cert-monitor",
+              "icon_url" : "https://avatars3.githubusercontent.com/u/49783738?s=200&v=4",
+              "channel": "${{ env.SLACK_CHANNEL }}",
               "blocks" : [
                   {
                       "type" : "section",
@@ -96,5 +101,3 @@ jobs:
             --url ${{ secrets.SLACK_WEBHOOK_URL }} \
             -H "Content-Type: application/json" \
             --data '${{ fromJson(steps.should_alert.outputs.result).slackNotificationPayload }}'
-
-          
