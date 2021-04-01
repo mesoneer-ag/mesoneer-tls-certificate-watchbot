@@ -1,4 +1,4 @@
-name: "Check test-digitalid.ubiid.ch Certificate"
+name: "Check testbed-sandbox.ubiid.ch Certificate"
 
 on:
   push:

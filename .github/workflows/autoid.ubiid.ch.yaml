@@ -1,4 +1,4 @@
-name: "Check *.ubiid.ch Certificate"
+name: "Check autoid.ubiid.ch Certificate"
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
     - cron: '0 0 * * *'
 
 env:
-  DOMAIN: 'sandbox-autoid.ubiid.ch'
+  DOMAIN: 'autoid.ubiid.ch'
   SLACK_CHANNEL: '#ubiid_ops'
 
 

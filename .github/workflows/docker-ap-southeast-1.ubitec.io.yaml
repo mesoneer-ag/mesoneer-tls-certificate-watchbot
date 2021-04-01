@@ -1,4 +1,4 @@
-name: "Check *.ubitec.io Certificate"
+name: "Check docker-ap-southeast-1.ubitec.io Certificate"
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
     - cron: '0 0 * * *'
 
 env:
-  DOMAIN: 'docker.ubitec.io'
+  DOMAIN: 'docker-ap-southeast-1.ubitec.io'
   SLACK_CHANNEL: '#infras-alert'
 
 jobs:
