@@ -12,6 +12,8 @@ If the date defined in the `notAfter` field in the certificate is about <= 30 da
 
 ## TODO
 
+[ ] Find a way to update the repository, otherwise GitHub Actions will be disabled after 60 days of inactivities.
+
 [ ] Inform Slack if the workflow fails. Hint: use `if: failure()`.
 
 [ ] Allow the workflow to loop on a configuration file instead of copy-pasting the workflow file for every domain.
