@@ -1,3 +1,4 @@
+# This file serves as the template to generate GitHub Workflow.
 name: "Check docker-ap-southeast-1.ubitec.io Certificate"
 
 on:
@@ -110,3 +111,4 @@ jobs:
             --url ${{ secrets.TEAMS_WEBHOOK_URL }} \
             -H "Content-Type: application/json" \
             --data '${{ fromJson(steps.should_alert.outputs.result).teamsMessagePayload }}'
+

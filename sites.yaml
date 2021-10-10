@@ -1,0 +1,7 @@
+sites:
+  - domain: 'docker-ap-southeast-1.ubitec.io'
+  - domain: 'docker-eu-central-1.ubitec.io'
+  - domain: 'autoid.ubiid.ch'
+  - domain: 'sandbox-autoid.ubiid.ch'
+  - domain: 'test-digitalid.ubiid.ch'
+  - domain: 'testbed-sandbox.ubiid.ch'

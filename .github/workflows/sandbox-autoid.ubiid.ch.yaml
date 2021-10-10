@@ -1,3 +1,4 @@
+# This file serves as the template to generate GitHub Workflow.
 name: "Check sandbox-autoid.ubiid.ch Certificate"
 
 on:
@@ -11,8 +12,6 @@ on:
 
 env:
   DOMAIN: 'sandbox-autoid.ubiid.ch'
-  SLACK_CHANNEL: '#ubiid_ops'
-
 
 jobs:
   check-certificate:
@@ -27,7 +26,7 @@ jobs:
             | grep notAfter)
           echo "::set-output name=notAfter::${notAfter/notAfter=/}"
 
-      - name: Show exipration date
+      - name: Show expiration date
         id: debug
         run: |
           echo ${{ steps.probe_cert.outputs.notAfter }}
@@ -53,58 +52,63 @@ jobs:
         id: should_alert
         uses: actions/github-script@v3
         with:
-          script: |
+          script: |-
             const domain = "${{ env.DOMAIN }}";
             const notAfter = "${{ steps.probe_cert.outputs.notAfter }}";
             const daysLeft = Number.parseInt('${{ steps.calculate_dates_until_expiration.outputs.daysLeft }}');
-            console.log("[info] - Days left until exipiry: " + daysLeft);
+            console.log("[info] - Days left until expiry date: " + daysLeft);
 
             const range = (lower, upper) => ({ contains: (value) => lower <= value && value <= upper });
             const alertingRangesOfDaysLeft = [range(0, 5), range(9, 10), range(19, 20), range(29, 30)];
             const shouldAlert = alertingRangesOfDaysLeft.some(r => r.contains(daysLeft));
+            const forceNotification = "${{ secrets.FORCE_NOTIFICATION }}" === "true";
 
-            if (shouldAlert == false) {
+            if (forceNotification === false && shouldAlert === false) {
               return {
                 shouldAlert
               }
             }
 
-            slackNotificationPayload = {
-              "username" : "ubitec-tls-cert-monitor",
-              "icon_url" : "https://avatars3.githubusercontent.com/u/49783738?s=200&v=4",
-              "channel": "${{ env.SLACK_CHANNEL }}",
-              "blocks" : [
-                  {
-                      "type" : "section",
-                      "text" : {
-                          "type" : "mrkdwn",
-                          "text" : `:warning: TLS certificate for ${domain} is about to expire`
-                      }
-                  },
-                  {
-                      "type" : "divider"
-                  },
-                  {
-                      "type" : "section",
-                      "text" : {
-                          "type" : "mrkdwn",
-                          "text" : `Certificate for domain ${domain} is about to expire on ${notAfter} (in ${daysLeft} days).`
-                      }
-                  }
+            teamsMessagePayload = {
+              "@type": "MessageCard",
+              "@context": "http://schema.org/extensions",
+              "themeColor": "f1c40f",
+              "summary": "TLS Certificate Expiration Alerts",
+              "sections": [
+                {
+                  "activityTitle": `TLS Certificate for \`${domain}\` is about to expire`,
+                  "activitySubtitle": "ubitec TLS Monitoring",
+                  "activityImage": "https://github.com/ubitechq/ubitec-tls-certificate-monitor/raw/master/yellow-circle-warning.png",
+                  "facts": [
+                    {
+                        "name": "Site",
+                        "value": `https://${domain}`
+                    },
+                    {
+                    "name": "Expiration Date",
+                    "value": `${notAfter}`
+                    },
+                    {
+                      "name": "Days Left",
+                      "value": `${daysLeft}`
+                    }
+                  ],
+                  "markdown": true
+                }
               ]
-            }
+            };
 
             return {
               shouldAlert: true,
-              slackNotificationPayload: JSON.stringify(slackNotificationPayload)
+              teamsMessagePayload: JSON.stringify(teamsMessagePayload)
             }
 
-
-      - name: Send alert to Slack if needed
-        id: slack_send
+      - name: Send alert to Teams if needed
+        id: teams_send
         if: ${{ fromJson(steps.should_alert.outputs.result).shouldAlert }}
         run: |
           curl -X POST \
-            --url ${{ secrets.SLACK_WEBHOOK_URL }} \
+            --url ${{ secrets.TEAMS_WEBHOOK_URL }} \
             -H "Content-Type: application/json" \
-            --data '${{ fromJson(steps.should_alert.outputs.result).slackNotificationPayload }}'
+            --data '${{ fromJson(steps.should_alert.outputs.result).teamsMessagePayload }}'
+

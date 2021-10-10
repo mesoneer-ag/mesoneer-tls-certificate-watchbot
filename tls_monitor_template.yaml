@@ -1,5 +1,6 @@
 # This file serves as the template to generate GitHub Workflow.
-name: "Check docker-eu-central-1.ubitec.io Certificate"
+{{={> <}=}}
+name: "Check {> domain <} Certificate"
 
 on:
   push:
@@ -11,7 +12,7 @@ on:
     - cron: '0 0 * * *'
 
 env:
-  DOMAIN: 'docker-eu-central-1.ubitec.io'
+  DOMAIN: '{> domain <}'
 
 jobs:
   check-certificate:
@@ -112,3 +113,4 @@ jobs:
             -H "Content-Type: application/json" \
             --data '${{ fromJson(steps.should_alert.outputs.result).teamsMessagePayload }}'
 
+{>={{ }}=<}
