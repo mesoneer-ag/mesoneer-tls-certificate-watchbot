@@ -11,7 +11,6 @@ on:
 
 env:
   DOMAIN: 'docker-ap-southeast-1.ubitec.io'
-  SLACK_CHANNEL: '#infras-alert'
 
 jobs:
   check-certificate:
@@ -61,9 +60,9 @@ jobs:
             const range = (lower, upper) => ({ contains: (value) => lower <= value && value <= upper });
             const alertingRangesOfDaysLeft = [range(0, 5), range(9, 10), range(19, 20), range(29, 30)];
             const shouldAlert = alertingRangesOfDaysLeft.some(r => r.contains(daysLeft));
-            const forceNotification = "${{ env.FORCE_NOTIFICATION }}" === "true";
+            const forceNotification = "${{ secrets.FORCE_NOTIFICATION }}" === "true";
 
-            if (forceNotification === false || shouldAlert === false) {
+            if (forceNotification === false && shouldAlert === false) {
               return {
                 shouldAlert
               }
@@ -76,13 +75,13 @@ jobs:
               "summary": "TLS Certificate Expiration Alerts",
               "sections": [
                 {
-                  "activityTitle": `TLS Certificate for ${domain} is about to expire`,
+                  "activityTitle": `TLS Certificate for \`${domain}\` is about to expire`,
                   "activitySubtitle": "ubitec TLS Monitoring",
                   "activityImage": "https://github.com/ubitechq/ubitec-tls-certificate-monitor/raw/master/yellow-circle-warning.png",
                   "facts": [
                     {
                         "name": "Site",
-                        "value": `${domain}`
+                        "value": `https://${domain}`
                     },
                     {
                     "name": "Expiration Date",
