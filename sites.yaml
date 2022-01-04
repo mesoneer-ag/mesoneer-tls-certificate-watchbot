@@ -11,3 +11,7 @@ sites:
     port: 443
   - domain: 'testbed-sandbox.ubiid.ch'
     port: 443
+  - domain: 'turn-jitsi.ubitec.io'
+    port: 8443
+  - domain: 'turn-jitsi.ubitec.io'
+    port: 8445
