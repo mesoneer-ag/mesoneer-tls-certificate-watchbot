@@ -13,6 +13,7 @@ on:
 
 env:
   DOMAIN: '{> domain <}'
+  PORT: '{> port <}'
 
 jobs:
   check-certificate:
@@ -22,7 +23,7 @@ jobs:
         id: probe_cert
         run: | 
           notAfter=$(echo \
-            | openssl s_client -servername ${{ env.DOMAIN }} -connect ${{ env.DOMAIN }}:443 2>/dev/null \
+            | openssl s_client -servername ${{ env.DOMAIN }} -connect ${{ env.DOMAIN }}:${{ env.PORT }} 2>/dev/null \
             | openssl x509 -noout -dates \
             | grep notAfter)
           echo "::set-output name=notAfter::${notAfter/notAfter=/}"
