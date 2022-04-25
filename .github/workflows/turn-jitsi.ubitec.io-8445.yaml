@@ -1,6 +1,5 @@
 # This file serves as the template to generate GitHub Workflow.
-{{={> <}=}}
-name: "Check {> domain <} Certificate"
+name: "Check turn-jitsi.ubitec.io Certificate"
 
 on:
   push:
@@ -12,8 +11,8 @@ on:
     - cron: '0 0 * * *'
 
 env:
-  DOMAIN: '{> domain <}'
-  PORT: '{> port <}'
+  DOMAIN: 'turn-jitsi.ubitec.io'
+  PORT: '8445'
 
 jobs:
   check-certificate:
@@ -108,4 +107,3 @@ jobs:
             -H "Content-Type: application/json" \
             --data '${{ fromJson(steps.should_alert.outputs.result).slackMessagePayload }}'
 
-{>={{ }}=<}

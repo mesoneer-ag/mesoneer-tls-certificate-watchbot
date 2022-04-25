@@ -13,7 +13,7 @@ def main():
     with open('tls_monitor_template.yaml', 'r') as template:
         mustache_template = template.read()
         for site in sites:
-            with open(f".github/workflows/{site['domain']}.yaml", 'w') as workflow:
+            with open(f".github/workflows/{site['domain']}-{site['port']}.yaml", 'w') as workflow:
                 content = chevron.render(mustache_template, site) 
                 workflow.write(content)
 

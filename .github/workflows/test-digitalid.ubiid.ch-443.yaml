@@ -1,5 +1,5 @@
 # This file serves as the template to generate GitHub Workflow.
-name: "Check docker-ap-southeast-1.ubitec.io Certificate"
+name: "Check test-digitalid.ubiid.ch Certificate"
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
     - cron: '0 0 * * *'
 
 env:
-  DOMAIN: 'docker-ap-southeast-1.ubitec.io'
+  DOMAIN: 'test-digitalid.ubiid.ch'
   PORT: '443'
 
 jobs:
@@ -69,47 +69,41 @@ jobs:
                 shouldAlert
               }
             }
-
-            teamsMessagePayload = {
-              "@type": "MessageCard",
-              "@context": "http://schema.org/extensions",
-              "themeColor": "f1c40f",
-              "summary": "TLS Certificate Expiration Alerts",
-              "sections": [
+            slackMessagePayload = {
+              "attachments": [
                 {
-                  "activityTitle": `TLS Certificate for \`${domain}\` is about to expire`,
-                  "activitySubtitle": "ubitec TLS Monitoring",
-                  "activityImage": "https://github.com/ubitechq/ubitec-tls-certificate-monitor/raw/master/yellow-circle-warning.png",
-                  "facts": [
+                  "blocks": [
                     {
-                        "name": "Site",
-                        "value": `https://${domain}`
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": `*:warning: TLS Certificate for \`${domain}\` is about to expire.*`
+                      }
                     },
                     {
-                    "name": "Expiration Date",
-                    "value": `${notAfter}`
-                    },
-                    {
-                      "name": "Days Left",
-                      "value": `${daysLeft}`
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": `"*Site:* \`${domain}\`\n*Expiration Date:* ${notAfter}\n*Days Left*: ${daysLeft}`
+                      }
                     }
-                  ],
-                  "markdown": true
+                  ]
                 }
               ]
-            };
+            }
+
 
             return {
               shouldAlert: true,
-              teamsMessagePayload: JSON.stringify(teamsMessagePayload)
+              slackMessagePayload: JSON.stringify(slackMessagePayload)
             }
 
-      - name: Send alert to Teams if needed
-        id: teams_send
+      - name: Send alert to Slack if needed
+        id: slack_send
         if: ${{ fromJson(steps.should_alert.outputs.result).shouldAlert }}
         run: |
           curl -X POST \
-            --url ${{ secrets.TEAMS_WEBHOOK_URL }} \
+            --url ${{ secrets.SLACK_WEBHOOK_URL }} \
             -H "Content-Type: application/json" \
-            --data '${{ fromJson(steps.should_alert.outputs.result).teamsMessagePayload }}'
+            --data '${{ fromJson(steps.should_alert.outputs.result).slackMessagePayload }}'
 
