@@ -26,4 +26,4 @@ The configuration is in the `sites.yaml` which is a very simple structure. The t
 ## TODO
 
 - [ ] Find a way to update the repository, otherwise GitHub Actions will be disabled after 60 days of inactivities.
-- [ ] Inform Teams if the workflow fails. Hint: use `if: failure()`.
+- [ ] Inform Slack if the workflow fails. Hint: use `if: failure()`.
