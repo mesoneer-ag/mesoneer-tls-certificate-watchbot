@@ -62,7 +62,7 @@ jobs:
         id: add-git-commit
         run: |-
           touch executions.jsonl
-          cat <<'__PAYLOAD__' | jq -r  >>executions.jsonl
+          cat <<'__PAYLOAD__' >>executions.jsonl
           ${{ steps.tls_certificate_check.outputs.result }} 
           __PAYLOAD__
 
