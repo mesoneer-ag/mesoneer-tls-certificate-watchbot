@@ -1,0 +1,138 @@
+# This file serves as the template to generate GitHub Workflow.
+name: "Check TLS Certificate"
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  schedule:
+    # Run every day at 0:00am
+    - cron: '0 0 * * *'
+
+jobs:
+  check-certificate:
+    runs-on: ubuntu-latest
+    steps:
+      # checkout is required here because:
+      # - Needs the script to load.
+      # - Make commits
+      - uses: actions/checkout@v2
+
+      # Needs to use an NPM package in later steps.
+      - run: 'npm install node-fetch' 
+        
+      - name: Check the TLS certificate 
+        id: tls_certificate_check
+        uses: actions/github-script@v6
+        env:
+          FORCE_NOTIFICATION: "${{ secrets.FORCE_NOTIFICATION }}"
+        with:
+          script: |-
+            const cert = require("./src/fetch-cert.js").use({exec});;
+            const { daysFromNow, range } = require("./src/tools.js");
+
+            const alertingRangesOfDaysLeft = [range(0, 5), range(9, 10), range(19, 20), range(29, 30)];
+            const forceNotification = process.env.FORCE_NOTIFICATION === "true";
+
+            const { sites } = require("./sites.json");
+
+            const checkSite = async (site) => {
+              const { domain, port } = site;
+              const notAfter = await cert.fetchNotAfter(domain, port); 
+              console.log(`[info] - [${domain}:${port}]:  Field notAfter read from TLS certificate: ${notAfter}`);
+
+              const daysLeft = daysFromNow(notAfter);
+              console.log(`[info] - [${domain}:${port}]: Day left: ${daysLeft}`);
+
+              const shouldAlert = alertingRangesOfDaysLeft.some(r => r.contains(daysLeft));
+              return ({
+                domain,
+                port,
+                notAfter,
+                daysLeft,
+                shouldAlert
+              });
+            };
+            const result = await Promise.all(sites.map(checkSite));
+            console.log("[debug] - " + JSON.stringify(result));
+            return result;
+
+      - name: Track execution as a Git commit
+        id: add-git-commit
+        run: |-
+          touch executions.jsonl
+          cat <<'__PAYLOAD__' | jq -r  >>executions.jsonl
+          ${{ steps.tls_certificate_check.outputs.result }} 
+          __PAYLOAD__
+
+          readonly now="$(date -u "+%Y-%m-%dT%H:%M:%S%Z")"
+          git config user.name "tls-watchbot"
+          git config user.email "tls-watchbot@dev.mesoneer.io"
+          git add executions.jsonl
+          git commit -m "Run at $now"
+          git push 
+
+      - name: Slack notifications
+        id: notify_slack
+        uses: actions/github-script@v6
+        env:
+          CHECKED_SITES: "${{ steps.tls_certificate_check.outputs.result }}"
+          SLACK_WEBHOOK_URL: "https://httpbin.org/status/401"
+        with:
+          script: |-
+            # TECHNICAL NOTE:
+            # This is how to import an ESM package on GitHub Action `github-script`.
+            const { default: fetch } = await import("${{ github.workspace }}/node_modules/node-fetch/src/index.js");
+            const checkedSites = JSON.parse(process.env.CHECKED_SITES);
+            const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+
+            const toSlackPayload = (site) => {
+              const { domain, notAfter, daysLeft } = site;
+              return ({
+                "attachments": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": `*:warning: TLS Certificate for \`${domain}\` is about to expire.*`
+                        }
+                      },
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": `*Site:* \`${domain}\`\n*Expiration Date:* ${notAfter}\n*Days Left*: ${daysLeft}`
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }); 
+            };
+            const sendSlack = (slackWebhookUrl) => {
+              return (async (payload) => {
+                const response = await fetch(slackWebhookUrl,
+                  {
+                    method: 'post',
+                    body: JSON.stringify(payload),
+                    headers: {
+                      "content-type": "application/json"
+                    }
+                  }
+                );
+                if (response.ok) { 
+                  return response;
+                } else {
+                  const body = await response.text();
+                  throw `Failed: ${response.status} - ${body}`;
+                }
+              });
+            };
+
+            await Promise.all(checkedSites
+                .filter(site => site.shouldAlert)
+                .map(toSlackPayload)
+                .map(sendSlack(slackWebhookUrl)));
