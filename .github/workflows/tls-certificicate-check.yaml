@@ -81,8 +81,8 @@ jobs:
           SLACK_WEBHOOK_URL: "https://httpbin.org/status/401"
         with:
           script: |-
-            # TECHNICAL NOTE:
-            # This is how to import an ESM package on GitHub Action `github-script`.
+            // TECHNICAL NOTE:
+            // This is how to import an ESM package on GitHub Action `github-script`.
             const { default: fetch } = await import("${{ github.workspace }}/node_modules/node-fetch/src/index.js");
             const checkedSites = JSON.parse(process.env.CHECKED_SITES);
             const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
@@ -112,6 +112,7 @@ jobs:
                 ]
               }); 
             };
+
             const sendSlack = (slackWebhookUrl) => {
               return (async (payload) => {
                 const response = await fetch(slackWebhookUrl,
@@ -135,4 +136,5 @@ jobs:
             await Promise.all(checkedSites
                 .filter(site => site.shouldAlert)
                 .map(toSlackPayload)
-                .map(sendSlack(slackWebhookUrl)));
+                .map(sendSlack(slackWebhookUrl))
+            );
