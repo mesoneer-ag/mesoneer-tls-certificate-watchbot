@@ -78,7 +78,7 @@ jobs:
         uses: actions/github-script@v6
         env:
           CHECKED_SITES: "${{ steps.tls_certificate_check.outputs.result }}"
-          SLACK_WEBHOOK_URL: "https://httpbin.org/status/401"
+          SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
         with:
           script: |-
             // TECHNICAL NOTE:
