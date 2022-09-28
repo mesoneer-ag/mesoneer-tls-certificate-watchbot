@@ -46,7 +46,7 @@ jobs:
               const daysLeft = daysFromNow(notAfter);
               console.log(`[info] - [${domain}:${port}]: Day left: ${daysLeft}`);
 
-              const shouldAlert = alertingRangesOfDaysLeft.some(r => r.contains(daysLeft));
+              const shouldAlert = forceNotification || alertingRangesOfDaysLeft.some(r => r.contains(daysLeft));
               return ({
                 domain,
                 port,
