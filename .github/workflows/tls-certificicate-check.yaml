@@ -90,26 +90,22 @@ jobs:
             const toSlackPayload = (site) => {
               const { domain, notAfter, daysLeft } = site;
               return ({
-                "attachments": [
-                  {
-                    "blocks": [
-                      {
-                        "type": "section",
-                        "text": {
-                          "type": "mrkdwn",
-                          "text": `*:warning: TLS Certificate for \`${domain}\` is about to expire.*`
-                        }
-                      },
-                      {
-                        "type": "section",
-                        "text": {
-                          "type": "mrkdwn",
-                          "text": `*Site:* \`${domain}\`\n*Expiration Date:* ${notAfter}\n*Days Left*: ${daysLeft}`
-                        }
+                 "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": `*:warning: TLS Certificate for \`${domain}\` is about to expire.*`
                       }
-                    ]
-                  }
-                ]
+                    },
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": `*Site:* \`${domain}\`\n*Expiration Date:* ${notAfter}\n*Days Left*: ${daysLeft}`
+                      }
+                    }
+                  ]
               }); 
             };
 
