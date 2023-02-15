@@ -19,9 +19,6 @@ jobs:
       # - Needs the script to load.
       # - Make commits
       - uses: actions/checkout@v2
-
-      # Needs to use an NPM package in later steps.
-      - run: 'npm install node-fetch' 
         
       - name: Check the TLS certificate 
         id: tls_certificate_check
@@ -82,9 +79,6 @@ jobs:
           SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
         with:
           script: |-
-            // TECHNICAL NOTE:
-            // This is how to import an ESM package on GitHub Action `github-script`.
-            const { default: fetch } = await import("${{ github.workspace }}/node_modules/node-fetch/src/index.js");
             const checkedSites = JSON.parse(process.env.CHECKED_SITES);
             const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
 
