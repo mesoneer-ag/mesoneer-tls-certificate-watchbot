@@ -24,7 +24,7 @@ jobs:
         id: tls_certificate_check
         uses: actions/github-script@v6
         env:
-          FORCE_NOTIFICATION: "${{ secrets.FORCE_NOTIFICATION }}"
+          FORCE_NOTIFICATION: "${{ vars.FORCE_NOTIFICATION }}"
         with:
           script: |-
             const cert = require("./src/fetch-cert.js").use({exec});;
