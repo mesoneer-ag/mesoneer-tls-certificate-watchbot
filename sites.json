@@ -9,6 +9,18 @@
       "port": 443
     },
     {
+      "domain": "mcr.pub.mesoneer.io",
+      "port": 443
+    },
+    {
+      "domain": "mcr-eu-central-1.pub.mesoneer.io",
+      "port": 443
+    },
+    {
+      "domain": "mcr-ap-southeast-1.pub.mesoneer.io",
+      "port": 443
+    },
+    {
       "domain": "autoid.ubiid.ch",
       "port": 443
     },
@@ -31,6 +43,22 @@
     {
       "domain": "turn-jitsi.ubitec.io",
       "port": 8445
+    },
+    {
+      "domain": "harbor.pub.mesoneer.io",
+      "port": 443
+    },
+    {
+      "domain": "nexus.pub.mesoneer.io",
+      "port": 443
+    },
+    {
+      "domain": "solutions.curo.world",
+      "port": 443
+    },
+    {
+      "domain": "frutiger.apps.mesoneer.io",
+      "port": 443
     }
   ]
 }
