@@ -18,7 +18,7 @@ jobs:
       # checkout is required here because:
       # - Needs the script to load.
       # - Make commits
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         
       - name: Check the TLS certificate 
         id: tls_certificate_check
