@@ -35,7 +35,7 @@
     {
       "domain": "sandbox-autoid.id-validation.ch",
       "port": 443
-    }
+    },
     {
       "domain": "test-digitalid.ubiid.ch",
       "port": 443
