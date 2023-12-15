@@ -67,6 +67,10 @@
     {
       "domain": "frutiger.apps.mesoneer.io",
       "port": 443
+    },
+    {
+      "domain": "app.signeer.io",
+      "port": 443
     }
   ]
 }
