@@ -45,11 +45,11 @@
       "port": 443
     },
     {
-      "domain": "solutions.curo.world",
+      "domain": "app.signeer.io",
       "port": 443
     },
     {
-      "domain": "app.signeer.io",
+      "domain": "headscale.pub.mesoneer.io",
       "port": 443
     }
   ]
