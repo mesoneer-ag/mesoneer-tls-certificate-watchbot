@@ -60,6 +60,9 @@ jobs:
         id: add-git-commit
         run: |-
           touch executions.jsonl
+          last_30_run="$(tail -n 30 executions.jsonl)"
+          echo "[info] - Truncate executions.jsonl to keep its last 30 runs."
+          echo -n "$last_30_run" >|executions.jsonl
           cat <<'__PAYLOAD__' >>executions.jsonl
           ${{ steps.tls_certificate_check.outputs.result }} 
           __PAYLOAD__
