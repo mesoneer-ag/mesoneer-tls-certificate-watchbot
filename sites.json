@@ -1,14 +1,6 @@
 {
   "sites": [
     {
-      "domain": "docker-ap-southeast-1.ubitec.io",
-      "port": 443
-    },
-    {
-      "domain": "docker-eu-central-1.ubitec.io",
-      "port": 443
-    },
-    {
       "domain": "mcr.pub.mesoneer.io",
       "port": 443
     },
@@ -26,14 +18,6 @@
     },
     {
       "domain": "sandbox-autoid.id-validation.ch",
-      "port": 443
-    },
-    {
-      "domain": "harbor.pub.mesoneer.io",
-      "port": 443
-    },
-    {
-      "domain": "nexus.pub.mesoneer.io",
       "port": 443
     },
     {
